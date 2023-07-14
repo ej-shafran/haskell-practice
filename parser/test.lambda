@@ -1,0 +1,5 @@
+def id = \x -> x
+def apply = \f -> \a -> (f a)
+def selfApply = \s -> (s s)
+
+((apply selfApply) id)

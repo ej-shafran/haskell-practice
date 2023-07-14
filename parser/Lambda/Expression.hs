@@ -1,7 +1,7 @@
 module Lambda.Expression
   ( Expression (..),
+    Function (..),
     nameSpan,
-    nameParser,
     functionParser,
     expressionParser,
     parseExpression,
@@ -12,12 +12,6 @@ import Control.Applicative
 import Data.Char (isSpace)
 import Data.Functor
 import Parser
-
-data Expression
-  = Name String
-  | Function {param :: String, body :: Expression}
-  | Application {function :: Expression, argument :: Expression}
-  deriving (Show)
 
 isReservedChar :: Char -> Bool
 isReservedChar c = isSpace c || c == '=' || c == '\\' || c == 'λ' || c == '•' || c == '(' || c == ')'
@@ -35,8 +29,23 @@ dotChar = do
 nameSpan :: Parser String
 nameSpan = nonEmptyP (spanP $ not . isReservedChar)
 
-nameParser :: Parser Expression
-nameParser = Name <$> nameSpan
+data Expression
+  = NameExpression String
+  | FunctionExpression Function
+  | ApplicationExpression {function :: Expression, argument :: Expression}
+  deriving (Show)
+
+data Function = Function {param :: String, body :: Expression} deriving (Show)
+
+functionParser :: Parser Function
+functionParser = do
+  lambdaChar
+  param <- nameSpan
+  wsP
+  dotChar
+  wsP
+  body <- expressionParser
+  return (Function {param, body})
 
 applicationParser :: Parser Expression
 applicationParser = do
@@ -48,20 +57,13 @@ applicationParser = do
   argument <- expressionParser
   wsP
   charP ')'
-  return (Application {function, argument})
-
-functionParser :: Parser Expression
-functionParser = do
-  lambdaChar
-  param <- nameSpan
-  wsP
-  dotChar
-  wsP
-  body <- expressionParser
-  return (Function {param, body})
+  return (ApplicationExpression {function, argument})
 
 expressionParser :: Parser Expression
-expressionParser = nameParser <|> applicationParser <|> functionParser
+expressionParser =
+  (NameExpression <$> nameSpan)
+    <|> applicationParser
+    <|> (FunctionExpression <$> functionParser)
 
 parseExpression :: String -> Maybe Expression
 parseExpression = finalize (wsP *> expressionParser <* wsP <* eofP)

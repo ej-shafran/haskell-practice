@@ -1,8 +1,8 @@
 module Main where
 
-import Lambda.Definition
+import Lambda.Parse
 
 main :: IO ()
 main = do
   input <- getContents
-  mapM_ print (parseProgram input)
+  mapM_ print $ parseProgram input

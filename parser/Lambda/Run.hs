@@ -38,6 +38,7 @@ runExpression defs (ApplicationExpression f a) = do
   return (obfuscate result)
 runExpression defs exp = getFunc defs exp
 
+runProgram :: String -> Maybe Function
 runProgram input = do
   (exp, defs) <- parseProgram input
   runExpression defs exp

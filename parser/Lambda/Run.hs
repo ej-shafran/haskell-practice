@@ -5,44 +5,28 @@ import Data.List (find)
 import Lambda.Parse
 import Parser
 
-lambdaApply :: [Definition] -> Expression -> Expression -> Maybe Function
-lambdaApply defs f a = do
-  f' <- getFunc defs f
-  a' <- getFunc defs a
-  callFunc defs f' a'
-
-getFunc :: [Definition] -> Expression -> Maybe Function
--- TODO: maybe replace definitions inside the function body?
-getFunc defs (FunctionExpression f) = Just f
-getFunc defs (NameExpression n) = do
-  def <- find ((== n) . name) defs
-  getFunc defs (expression def)
-getFunc defs (ApplicationExpression f a) = lambdaApply defs f a
-
-replaceName :: Expression -> String -> Expression -> Expression
-replaceName exp target goal = case exp of
-  NameExpression n | n == target -> goal
-  FunctionExpression (Function p b) -> FunctionExpression $ Function p (replaceName b target goal)
-  ApplicationExpression f a -> ApplicationExpression (replaceName f target goal) (replaceName a target goal)
+replaceName :: Expression -> [String] -> String -> Expression -> Expression
+replaceName exp safe target goal = case exp of
+  NameExpression n | n == target && n `notElem` safe -> goal
+  FunctionExpression (Function p b) -> FunctionExpression $ Function p (replaceName b (p : safe) target goal)
+  ApplicationExpression f a -> ApplicationExpression (replaceName f safe target goal) (replaceName a safe target goal)
   n -> n
 
-obfuscate :: Function -> Function
-obfuscate (Function p b) = Function newName (replaceName b p (NameExpression newName))
-  where
-    newName = '_' : p
+evaluate :: [Definition] -> Expression -> Maybe Function
+-- TODO: maybe replace definitions inside the function body?
+evaluate defs (FunctionExpression f) = Just f
+evaluate defs (NameExpression n) = do
+  def <- find ((== n) . name) defs
+  evaluate defs (expression def)
+evaluate defs (ApplicationExpression f a) = do
+  f' <- evaluate defs f
+  a' <- evaluate defs a
+  call defs f' a'
 
-callFunc :: [Definition] -> Function -> Function -> Maybe Function
-callFunc defs f a = getFunc defs $ replaceName (body f) (param f) (FunctionExpression a)
-
--- TODO: actually fix name conflicts...
-runExpression :: [Definition] -> Expression -> Maybe Function
-runExpression defs (ApplicationExpression f a) = do
-  result <- lambdaApply defs f a
-  -- TODO: only do this if there are any name clashes
-  return (obfuscate result)
-runExpression defs exp = getFunc defs exp
+call :: [Definition] -> Function -> Function -> Maybe Function
+call defs (Function p b) a = evaluate defs $ replaceName b [] p (FunctionExpression a)
 
 runProgram :: String -> Maybe Function
 runProgram input = do
   (exp, defs) <- parseProgram input
-  runExpression defs exp
+  evaluate defs exp

@@ -82,8 +82,8 @@ expressionParser =
 
 data Definition = Definition {name :: String, expression :: Expression} deriving (Show)
 
-definitionParser :: Parser Definition
-definitionParser = do
+simpleDefParser :: Parser Definition
+simpleDefParser = do
   literalP "def "
   wsP
   name <- nameSpan
@@ -92,6 +92,22 @@ definitionParser = do
   wsP
   expression <- expressionParser
   return Definition {name, expression}
+
+complexDefParser :: Parser Definition
+complexDefParser = do
+  literalP "def "
+  wsP
+  name <- nameSpan
+  wsP
+  params <- many $ nameSpan <* wsP
+  charP '='
+  wsP
+  expression <- expressionParser
+  let final = foldr (\prm exp -> FunctionExpression (Function {param = prm, body = exp})) expression params
+  return Definition {name = name, expression = final}
+
+definitionParser :: Parser Definition
+definitionParser = simpleDefParser <|> complexDefParser
 
 -- Comments
 

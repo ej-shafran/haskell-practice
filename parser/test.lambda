@@ -1,32 +1,32 @@
-def identity = \x -> x
-def self_apply = \s -> (s s)
-def apply = \func -> \arg -> (func arg)
+def identity x = x
+def self_apply s = (s s)
+def apply func arg = (func arg)
 
-def select_first = \first -> \second -> first
-def select_second = \first -> \second -> second
+def select_first first second = first
+def select_second first second = second
 
 # the way to write
 # x ? a : b
 # is
 # (((cond a) b) x)
-def cond = \e1 -> \e2 -> \c -> ((c e1) e2)
+def cond e1 e2 c = ((c e1) e2)
 def true = select_first
 def false = select_second
 
-def not = \x -> ((x false) true)
-def and = \a -> \b -> ((a b) false)
-def or = \a -> \b -> ((a true) b)
+def not x = ((x false) true)
+def and a b = ((a b) false)
+def or a b = ((a true) b)
 
 def zero = identity
-def succ = \n -> \s -> ((s false) n)
+def succ n s = ((s false) n)
 
 def one = (succ zero)
 def two = (succ one)
 def three = (succ two)
 
-def is_zero = \n -> (n select_first)
+def is_zero n = (n select_first)
 
-def pred1 = \n -> (n select_second)
-def pred = \n -> (((is_zero n) zero) (n select_second))
+def pred1 n = (n select_second)
+def pred n = (((is_zero n) zero) (n select_second))
 
 two

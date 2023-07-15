@@ -100,6 +100,7 @@ commentParser = do
   charP '#'
   spanP (/= '\n')
   charP '\n'
+  wsP
   return ()
 
 -- Program
@@ -118,6 +119,7 @@ programParser = do
   wsP
   defs <- definitions
   wsP
+  many commentParser
   final <- expressionParser
   wsP
   many commentParser

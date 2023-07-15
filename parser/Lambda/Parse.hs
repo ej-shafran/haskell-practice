@@ -93,10 +93,30 @@ definitionParser = do
   function <- functionParser
   return Definition {name, function}
 
+-- Comments
+
+commentParser :: Parser ()
+commentParser =
+  ( do
+      charP '#'
+      spanP (/= '\n')
+      return ()
+  )
+    <|> pure ()
+
 -- Program
 
+defOrComment :: Parser Definition
+defOrComment = do
+  commentParser
+  wsP
+  def <- definitionParser <* (charP '\n' *> wsP <|> pure [])
+  wsP
+  commentParser
+  return def
+
 definitions :: Parser [Definition]
-definitions = many $ definitionParser <* (charP '\n' *> wsP <|> pure [])
+definitions = many defOrComment
 
 programParser :: Parser (Expression, [Definition])
 programParser = do

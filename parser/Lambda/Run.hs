@@ -5,13 +5,16 @@ import Data.List (find)
 import Lambda.Parse
 import Parser
 
-getFunc :: [Definition] -> Expression -> Maybe Function
-getFunc defs (FunctionExpression f) = Just f
-getFunc defs (NameExpression n) = function <$> find ((== n) . name) defs
-getFunc defs (ApplicationExpression f a) = do
+lambdaApply :: [Definition] -> Expression -> Expression -> Maybe Function
+lambdaApply defs f a = do
   f' <- getFunc defs f
   a' <- getFunc defs a
   callFunc defs f' a'
+
+getFunc :: [Definition] -> Expression -> Maybe Function
+getFunc defs (FunctionExpression f) = Just f
+getFunc defs (NameExpression n) = function <$> find ((== n) . name) defs
+getFunc defs (ApplicationExpression f a) = lambdaApply defs f a
 
 replaceName :: Expression -> String -> Expression -> Expression
 replaceName exp target goal = case exp of
@@ -30,9 +33,7 @@ callFunc defs f a = getFunc defs $ replaceName (body f) (param f) (FunctionExpre
 
 runExpression :: [Definition] -> Expression -> Maybe Function
 runExpression defs (ApplicationExpression f a) = do
-  f' <- getFunc defs f
-  a' <- getFunc defs a
-  result <- callFunc defs f' a'
+  result <- lambdaApply defs f a
   -- TODO: only do this if there are any name clashes
   return (obfuscate result)
 runExpression defs exp = getFunc defs exp

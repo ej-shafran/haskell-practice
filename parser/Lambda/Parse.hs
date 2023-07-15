@@ -82,6 +82,8 @@ expressionParser =
 
 data Definition = Definition {name :: String, function :: Function} deriving (Show)
 
+-- TODO: allow parsing things like
+-- def true = select_first
 definitionParser :: Parser Definition
 definitionParser = do
   literalP "def "

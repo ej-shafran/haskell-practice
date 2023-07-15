@@ -32,6 +32,7 @@ obfuscate (Function p b) = Function newName (replaceName b p (NameExpression new
 callFunc :: [Definition] -> Function -> Function -> Maybe Function
 callFunc defs f a = getFunc defs $ replaceName (body f) (param f) (FunctionExpression a)
 
+-- TODO: actually fix name conflicts...
 runExpression :: [Definition] -> Expression -> Maybe Function
 runExpression defs (ApplicationExpression f a) = do
   result <- lambdaApply defs f a

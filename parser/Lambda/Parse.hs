@@ -31,7 +31,11 @@ nameSpan = nonEmptyP (spanP $ not . isReservedChar)
 
 -- Function
 
-data Function = Function {param :: String, body :: Expression} deriving (Show)
+data Function = Function {param :: String, body :: Expression}
+
+instance Show Function where
+  show :: Function -> String
+  show (Function p b) = 'λ' : p ++ " • " ++ show b
 
 functionParser :: Parser Function
 functionParser = do
@@ -49,7 +53,12 @@ data Expression
   = NameExpression String
   | FunctionExpression Function
   | ApplicationExpression {func :: Expression, arg :: Expression}
-  deriving (Show)
+
+instance Show Expression where
+  show :: Expression -> String
+  show (NameExpression n) = n
+  show (FunctionExpression f) = show f
+  show (ApplicationExpression f a) = '(' : show f ++ " " ++ show a ++ ")"
 
 applicationParser :: Parser Expression
 applicationParser = do

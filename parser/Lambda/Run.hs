@@ -14,7 +14,9 @@ lambdaApply defs f a = do
 getFunc :: [Definition] -> Expression -> Maybe Function
 -- TODO: maybe replace definitions inside the function body?
 getFunc defs (FunctionExpression f) = Just f
-getFunc defs (NameExpression n) = function <$> find ((== n) . name) defs
+getFunc defs (NameExpression n) = do
+  def <- find ((== n) . name) defs
+  getFunc defs (expression def)
 getFunc defs (ApplicationExpression f a) = lambdaApply defs f a
 
 replaceName :: Expression -> String -> Expression -> Expression

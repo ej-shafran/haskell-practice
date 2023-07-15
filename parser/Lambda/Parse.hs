@@ -80,10 +80,8 @@ expressionParser =
 
 -- Definition
 
-data Definition = Definition {name :: String, function :: Function} deriving (Show)
+data Definition = Definition {name :: String, expression :: Expression} deriving (Show)
 
--- TODO: allow parsing things like
--- def true = select_first
 definitionParser :: Parser Definition
 definitionParser = do
   literalP "def "
@@ -92,8 +90,8 @@ definitionParser = do
   wsP
   charP '='
   wsP
-  function <- functionParser
-  return Definition {name, function}
+  expression <- expressionParser
+  return Definition {name, expression}
 
 -- Comments
 

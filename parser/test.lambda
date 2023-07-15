@@ -2,14 +2,16 @@ def identity = \x -> x
 def self_apply = \s -> (s s)
 def apply = \func -> \arg -> (func arg)
 
-def true = \first -> \_ -> first
-def false = \_ -> \second -> second
+def select_first = \first -> \_ -> first
+def select_second = \_ -> \second -> second
 
 # the way to write
 # x ? a : b
 # is
 # (((cond a) b) x)
 def cond = \e1 -> \e2 -> \c -> ((c e1) e2)
+def true = select_first
+def false = select_second
 
 def not = \x -> ((x false) true)
 
@@ -19,4 +21,4 @@ def not = \x -> ((x false) true)
 # ((and a) b)
 def and = \a -> \b -> ((a b) false)
 
-((and true) false)
+((and true) true)

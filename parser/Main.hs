@@ -1,8 +1,12 @@
 module Main where
 
-import Lambda.Parse
+-- TODO: use Either instead of Maybe for better error reporting
+import Lambda.Run
 
 main :: IO ()
 main = do
   input <- getContents
-  mapM_ print $ parseProgram input
+  let result = runProgram input
+  case result of
+    Just r -> print r
+    Nothing -> putStrLn "Failed to parse..."

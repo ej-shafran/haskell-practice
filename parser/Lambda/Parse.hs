@@ -65,7 +65,6 @@ applicationParser = do
   charP '('
   wsP
   func <- expressionParser
-  charP ' '
   wsP
   arg <- expressionParser
   wsP

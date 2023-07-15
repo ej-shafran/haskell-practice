@@ -1,15 +1,17 @@
+# BASIC FUNCTIONS
+
 def identity x = x
 def self_apply s = (s s)
 def apply func arg = (func arg)
 
 def select_first first second = first
 def select_second first second = second
+def make_pair e1 e2 c = ((c e1) e2)
 
-# the way to write
-# x ? a : b
-# is
-# (((cond a) b) x)
-def cond e1 e2 c = ((c e1) e2)
+# BOOLEAN LOGIC
+
+# the way to write `x ? a : b` is `(((cond a) b) x)`
+def cond = make_pair
 def true = select_first
 def false = select_second
 
@@ -17,16 +19,46 @@ def not x = ((x false) true)
 def and a b = ((a b) false)
 def or a b = ((a true) b)
 
-def zero = identity
+# INTEGERS
+
 def succ n s = ((s false) n)
 
+def zero = identity
 def one = (succ zero)
 def two = (succ one)
 def three = (succ two)
+def four = (succ three)
+def five = (succ four)
+def six = (succ five)
+def seven = (succ six)
+def eight = (succ seven)
+def nine = (succ eight)
 
 def is_zero n = (n select_first)
 
 def pred1 n = (n select_second)
 def pred n = (((is_zero n) zero) (n select_second))
 
-two
+def add1 f x y = (((cond x) ((f (succ x)) (pred y))) (is_zero y))
+def add = (recursive add1)
+
+def sub1 f x y = (((cond x) ((f (pred x)) (pred y))) (is_zero y))
+def sub = (recursive sub1)
+
+def mult1 f x y = (((cond zero) ((add x) ((f x) (pred y)))) (is_zero y))
+def mult = (recursive mult1)
+
+def greater x y = (not (is_zero ((sub x) y)))
+def greater_or_equal x y = (is_zero ((sub x) y))
+def less = (flip greater)
+def less_or_equal = (flip greater_or_equal)
+
+# FUNCTIONAL UTILS
+
+def recursive f = (
+  \s -> (f (s s))
+  \s -> (f (s s))
+)
+def flip f = \a -> \b -> ((f b) a)
+
+((less one) one)

@@ -96,24 +96,19 @@ definitionParser = do
 -- Comments
 
 commentParser :: Parser ()
-commentParser =
-  ( do
-      charP '#'
-      spanP (/= '\n')
-      return ()
-  )
-    <|> pure ()
+commentParser = do
+  charP '#'
+  spanP (/= '\n')
+  charP '\n'
+  return ()
 
 -- Program
 
 defOrComment :: Parser Definition
 defOrComment = do
-  commentParser
+  many commentParser
   wsP
-  def <- definitionParser <* (charP '\n' *> wsP <|> pure [])
-  wsP
-  commentParser
-  return def
+  definitionParser <* (charP '\n' *> wsP <|> pure [])
 
 definitions :: Parser [Definition]
 definitions = many defOrComment
@@ -125,6 +120,7 @@ programParser = do
   wsP
   final <- expressionParser
   wsP
+  many commentParser
   eofP
   return (final, defs)
 

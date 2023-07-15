@@ -1,4 +1,10 @@
-module Lambda.Parse (parseProgram) where
+module Lambda.Parse
+  ( parseProgram,
+    Expression (..),
+    Definition (..),
+    Function (..),
+  )
+where
 
 import Control.Applicative (many, (<|>))
 import Data.Char (isSpace)

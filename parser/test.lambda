@@ -10,8 +10,25 @@ def make_pair e1 e2 c = ((c e1) e2)
 
 # BOOLEAN LOGIC
 
-# the way to write `x ? a : b` is `(((cond a) b) x)`
-def cond = make_pair
+# we can write
+#
+# ```
+# if c
+#   then x
+#   else y
+# ```
+#
+# as
+#
+# ```
+# (((
+#   if c
+# )
+#   x)
+#   y)
+# ```
+
+def if c t f = ((c t) f)
 def true = select_first
 def false = select_second
 
@@ -39,14 +56,49 @@ def is_zero n = (n select_first)
 def pred1 n = (n select_second)
 def pred n = (((is_zero n) zero) (n select_second))
 
-def add1 f x y = (((cond x) ((f (succ x)) (pred y))) (is_zero y))
+def add1 _add x y = (((
+    if (is_zero y)
+  ) 
+    x) 
+    ((_add (succ x)) (pred y)))
 def add = (recursive add1)
 
-def sub1 f x y = (((cond x) ((f (pred x)) (pred y))) (is_zero y))
+def sub1 _sub x y = (((
+    if (is_zero y)
+  ) 
+    x) 
+    ((_sub (pred x)) (pred y)))
 def sub = (recursive sub1)
 
-def mult1 f x y = (((cond zero) ((add x) ((f x) (pred y)))) (is_zero y))
+def mult1 _mult x y = (((
+    if (is_zero y)
+  ) 
+    zero) 
+    ((add x) ((_mult x) (pred y))))
 def mult = (recursive mult1)
+
+def div1 _div x y = (((
+    if ((greater y) x)
+  ) 
+    zero) 
+    (succ ((_div ((sub x) y)) y)))
+def div2 = (recursive div1)
+def div x y = (((
+    if (is_zero y)
+  ) 
+    zero) 
+    ((div2 x) y))
+
+def equal1 _equal x y = (((
+    if ((and (is_zero x)) (is_zero y))
+  )
+    true)
+    (((
+      if ((or (is_zero x)) (is_zero y))
+    )
+        false)
+        ((_equal (pred x)) (pred y))))
+def equal = (recursive equal1)
 
 def greater x y = (not (is_zero ((sub x) y)))
 def greater_or_equal x y = (is_zero ((sub x) y))
@@ -61,4 +113,100 @@ def recursive f = (
 )
 def flip f = \a -> \b -> ((f b) a)
 
-((less one) one)
+# TYPES
+
+def make_obj type value = \s -> ((s type) value)
+def type obj = (obj select_first)
+def value obj = (obj select_second)
+def is_type t obj = ((equal (type obj)) t)
+
+def error_type = zero
+def MAKE_ERROR = (make_obj error_type)
+def ERROR = (MAKE_ERROR error_type)
+def is_error = (is_type error_type)
+
+def bool_type = one
+
+def MAKE_BOOL = (make_obj bool_type)
+
+def TRUE = (MAKE_BOOL true)
+def FALSE = (MAKE_BOOL false)
+def is_bool = (is_type bool_type)
+def BOOL_ERROR = (MAKE_ERROR bool_type)
+
+def NOT X = (((
+    if (is_bool X)
+  )
+    (MAKE_BOOL (not (value X))))
+    BOOL_ERROR)
+
+def AND X Y = (((
+    if ((and (is_bool X)) (is_bool Y))
+  )
+    (MAKE_BOOL ((and (value X)) (value Y))))
+    BOOL_ERROR)
+
+def IF C E1 E2 = (((
+    if (is_bool C)
+  )
+    (((if (value C)) E1) E2))
+    BOOL_ERROR)
+
+def IS_ERROR E = (MAKE_BOOL (is_error E))
+def IS_BOOL B = (MAKE_BOOL (is_bool B))
+
+def numb_type = two
+def MAKE_NUMB = (make_obj numb_type)
+def NUMB_ERROR = (MAKE_ERROR numb_type)
+def is_numb = (is_type numb_type)
+def IS_NUMB N = (MAKE_BOOL (is_numb N))
+
+def 0 = (MAKE_NUMB zero)
+def SUCC N = (((
+    if (is_numb N)
+  )
+    (MAKE_NUMB (succ (value N))))
+    NUMB_ERROR)
+
+def 1 = (MAKE_NUMB one)
+def 2 = (MAKE_NUMB two)
+def 3 = (MAKE_NUMB three)
+def 4 = (MAKE_NUMB four)
+def 5 = (MAKE_NUMB five)
+def 6 = (MAKE_NUMB six)
+def 7 = (MAKE_NUMB seven)
+def 8 = (MAKE_NUMB eight)
+def 9 = (MAKE_NUMB nine)
+
+def PRED N = (((
+    if (not (is_numb N))
+  )
+    NUMB_ERROR)
+    (((
+        if (is_zero (value N))
+    )
+        NUMB_ERROR)
+        (MAKE_NUMB ((value N) select_second))) 
+    )
+
+def IS_ZERO N = (((
+    if (is_numb N)
+  )
+    (MAKE_BOOL (is_zero (value N))))
+    NUMB_ERROR)
+
+def both_numbs X Y = ((and (is_numb X)) (is_numb Y))
+
+def + X Y = (((
+    if ((both_numbs X) Y)
+  )
+    (MAKE_NUMB ((add (value X)) (value Y))))
+    NUMB_ERROR)
+
+def * X Y = (((
+    if ((both_numbs X) Y)
+  )
+    (MAKE_NUMB ((mult (value X)) (value Y))))
+    NUMB_ERROR)
+
+((equal (value ((* 2) 2))) three)

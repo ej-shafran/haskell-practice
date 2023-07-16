@@ -1,12 +1,12 @@
 # BASIC FUNCTIONS
 
 def identity x = x
-def self_apply s = (s s)
-def apply func arg = (func arg)
+def self_apply s = s s
+def apply func arg = func arg
 
 def select_first first second = first
 def select_second first second = second
-def make_pair e1 e2 c = ((c e1) e2)
+def make_pair e1 e2 c = c e1 e2
 
 # BOOLEAN LOGIC
 
@@ -28,32 +28,32 @@ def make_pair e1 e2 c = ((c e1) e2)
 #   y)
 # ```
 
-def if c t f = ((c t) f)
+def if c t f = c t f
 def true = select_first
 def false = select_second
 
-def not x = ((x false) true)
-def and a b = ((a b) false)
-def or a b = ((a true) b)
+def not x = x false true
+def and a b = a b false
+def or a b = a true b
 
 # INTEGERS
 
-def succ n s = ((s false) n)
+def succ n s = s false n
 
 def zero = identity
-def one = (succ zero)
-def two = (succ one)
-def three = (succ two)
-def four = (succ three)
-def five = (succ four)
-def six = (succ five)
-def seven = (succ six)
-def eight = (succ seven)
-def nine = (succ eight)
+def one = succ zero
+def two = succ one
+def three = succ two
+def four = succ three
+def five = succ four
+def six = succ five
+def seven = succ six
+def eight = succ seven
+def nine = succ eight
 
-def is_zero n = (n select_first)
+def is_zero n = n select_first
 
-def pred1 n = (n select_second)
+def pred1 n = n select_second
 def pred n = (((is_zero n) zero) (n select_second))
 
 def add1 _add x y = (((
@@ -61,28 +61,28 @@ def add1 _add x y = (((
   ) 
     x) 
     ((_add (succ x)) (pred y)))
-def add = (recursive add1)
+def add = recursive add1
 
 def sub1 _sub x y = (((
     if (is_zero y)
   ) 
     x) 
     ((_sub (pred x)) (pred y)))
-def sub = (recursive sub1)
+def sub = recursive sub1
 
 def mult1 _mult x y = (((
     if (is_zero y)
   ) 
     zero) 
     ((add x) ((_mult x) (pred y))))
-def mult = (recursive mult1)
+def mult = recursive mult1
 
 def div1 _div x y = (((
     if ((greater y) x)
   ) 
     zero) 
     (succ ((_div ((sub x) y)) y)))
-def div2 = (recursive div1)
+def div2 = recursive div1
 def div x y = (((
     if (is_zero y)
   ) 
@@ -98,12 +98,12 @@ def equal1 _equal x y = (((
     )
         false)
         ((_equal (pred x)) (pred y))))
-def equal = (recursive equal1)
+def equal = recursive equal1
 
 def greater x y = (not (is_zero ((sub x) y)))
 def greater_or_equal x y = (is_zero ((sub x) y))
-def less = (flip greater)
-def less_or_equal = (flip greater_or_equal)
+def less = flip greater
+def less_or_equal = flip greater_or_equal
 
 # FUNCTIONAL UTILS
 
@@ -111,28 +111,28 @@ def recursive f = (
   \s -> (f (s s))
   \s -> (f (s s))
 )
-def flip f = \a -> \b -> ((f b) a)
+def flip f = \a -> \b -> f b a
 
 # TYPES
 
-def make_obj type value = \s -> ((s type) value)
-def type obj = (obj select_first)
-def value obj = (obj select_second)
+def make_obj type value = \s -> s type value
+def type obj = obj select_first
+def value obj = obj select_second
 def is_type t obj = ((equal (type obj)) t)
 
 def error_type = zero
-def MAKE_ERROR = (make_obj error_type)
-def ERROR = (MAKE_ERROR error_type)
-def is_error = (is_type error_type)
+def MAKE_ERROR = make_obj error_type
+def ERROR = MAKE_ERROR error_type
+def is_error = is_type error_type
 
 def bool_type = one
 
-def MAKE_BOOL = (make_obj bool_type)
+def MAKE_BOOL = make_obj bool_type
 
-def TRUE = (MAKE_BOOL true)
-def FALSE = (MAKE_BOOL false)
-def is_bool = (is_type bool_type)
-def BOOL_ERROR = (MAKE_ERROR bool_type)
+def TRUE = MAKE_BOOL true
+def FALSE = MAKE_BOOL false
+def is_bool = is_type bool_type
+def BOOL_ERROR = MAKE_ERROR bool_type
 
 def NOT X = (((
     if (is_bool X)
@@ -152,31 +152,31 @@ def IF C E1 E2 = (((
     (((if (value C)) E1) E2))
     BOOL_ERROR)
 
-def IS_ERROR E = (MAKE_BOOL (is_error E))
-def IS_BOOL B = (MAKE_BOOL (is_bool B))
+def IS_ERROR E = MAKE_BOOL (is_error E)
+def IS_BOOL B = MAKE_BOOL (is_bool B)
 
 def numb_type = two
-def MAKE_NUMB = (make_obj numb_type)
-def NUMB_ERROR = (MAKE_ERROR numb_type)
-def is_numb = (is_type numb_type)
-def IS_NUMB N = (MAKE_BOOL (is_numb N))
+def MAKE_NUMB = make_obj numb_type
+def NUMB_ERROR = MAKE_ERROR numb_type
+def is_numb = is_type numb_type
+def IS_NUMB N = MAKE_BOOL (is_numb N)
 
-def 0 = (MAKE_NUMB zero)
+def 0 = MAKE_NUMB zero
 def SUCC N = (((
     if (is_numb N)
   )
     (MAKE_NUMB (succ (value N))))
     NUMB_ERROR)
 
-def 1 = (MAKE_NUMB one)
-def 2 = (MAKE_NUMB two)
-def 3 = (MAKE_NUMB three)
-def 4 = (MAKE_NUMB four)
-def 5 = (MAKE_NUMB five)
-def 6 = (MAKE_NUMB six)
-def 7 = (MAKE_NUMB seven)
-def 8 = (MAKE_NUMB eight)
-def 9 = (MAKE_NUMB nine)
+def 1 = MAKE_NUMB one
+def 2 = MAKE_NUMB two
+def 3 = MAKE_NUMB three
+def 4 = MAKE_NUMB four
+def 5 = MAKE_NUMB five
+def 6 = MAKE_NUMB six
+def 7 = MAKE_NUMB seven
+def 8 = MAKE_NUMB eight
+def 9 = MAKE_NUMB nine
 
 def PRED N = (((
     if (not (is_numb N))
@@ -195,7 +195,7 @@ def IS_ZERO N = (((
     (MAKE_BOOL (is_zero (value N))))
     NUMB_ERROR)
 
-def both_numbs X Y = ((and (is_numb X)) (is_numb Y))
+def both_numbs X Y = and (is_numb X) (is_numb Y)
 
 def + X Y = (((
     if ((both_numbs X) Y)
@@ -209,4 +209,4 @@ def * X Y = (((
     (MAKE_NUMB ((mult (value X)) (value Y))))
     NUMB_ERROR)
 
-((equal (value ((* 2) 2))) three)
+equal (value ((* 2) 2)) three

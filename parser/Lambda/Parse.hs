@@ -64,18 +64,31 @@ applicationParser :: Parser Expression
 applicationParser = do
   charP '('
   wsP
-  func <- expressionParser
+  func <- xp
   wsP
-  arg <- expressionParser
+  arg <- xp
   wsP
   charP ')'
   return (ApplicationExpression {func, arg})
+  where xp = (FunctionExpression <$> functionParser) <|> applicationParser <|> (NameExpression <$> nameSpan)
+
 
 expressionParser :: Parser Expression
 expressionParser =
-  (NameExpression <$> nameSpan)
+  (FunctionExpression <$> functionParser)
     <|> applicationParser
-    <|> (FunctionExpression <$> functionParser)
+    <|> complexAppParser
+    <|> (NameExpression <$> nameSpan)
+
+complexAppParser :: Parser Expression
+complexAppParser = do
+  func <- xp
+  charP ' '
+  arg <- xp
+  exps <- many $ charP ' ' *> expressionParser
+  return $ foldl ApplicationExpression (ApplicationExpression {func, arg}) exps
+  where
+    xp = (FunctionExpression <$> functionParser) <|> applicationParser <|> (NameExpression <$> nameSpan)
 
 -- Definition
 

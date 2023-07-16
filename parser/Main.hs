@@ -1,14 +1,20 @@
 module Main where
 
--- TODO: support new syntax
 -- TODO: use Either instead of Maybe for better error reporting
--- TODO: support recursion
+
+import Lambda.Parse (Function, parseDefinitions)
 import Lambda.Run
+
+runWithPrelude :: String -> String -> Maybe Function
+runWithPrelude prelude program = do
+  preludeDefs <- parseDefinitions prelude
+  runProgram preludeDefs program
 
 main :: IO ()
 main = do
   input <- getContents
-  let result = runProgram input
+  prelude <- readFile "prelude.lambda"
+  let result = runWithPrelude prelude input
   case result of
     Just r -> print r
     Nothing -> putStrLn "Failed to parse..."

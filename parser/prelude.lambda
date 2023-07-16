@@ -10,24 +10,6 @@ def make_pair e1 e2 c = c e1 e2
 
 # BOOLEAN LOGIC
 
-# we can write
-#
-# ```
-# if c
-#   then x
-#   else y
-# ```
-#
-# as
-#
-# ```
-# (((
-#   if c
-# )
-#   x)
-#   y)
-# ```
-
 def if c t f = c t f
 def true = select_first
 def false = select_second
@@ -209,4 +191,12 @@ def * X Y = (((
     (MAKE_NUMB ((mult (value X)) (value Y))))
     NUMB_ERROR)
 
-equal (value ((* 2) 2)) three
+def / X Y = (((
+    if ((both_numbs X) Y)
+  )
+    (((
+        if (is_zero (value Y))
+      )
+        NUMB_ERROR)
+        (MAKE_NUMB ((div1 (value X)) (value Y)))))
+    NUMB_ERROR)

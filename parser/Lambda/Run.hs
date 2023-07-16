@@ -24,7 +24,7 @@ evaluate defs (ApplicationExpression f a) = do
 call :: [Definition] -> Function -> Expression -> Maybe Function
 call defs (Function p b) exp = evaluate defs $ replaceName b [] p exp
 
-runProgram :: String -> Maybe Function
-runProgram input = do
+runProgram :: [Definition] -> String -> Maybe Function
+runProgram preludeDefs input = do
   (exp, defs) <- parseProgram input
-  evaluate defs exp
+  evaluate (defs ++ preludeDefs) exp

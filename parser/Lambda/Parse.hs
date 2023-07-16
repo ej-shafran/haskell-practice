@@ -1,5 +1,6 @@
 module Lambda.Parse
   ( parseProgram,
+    parseDefinitions,
     Expression (..),
     Definition (..),
     Function (..),
@@ -70,8 +71,8 @@ applicationParser = do
   wsP
   charP ')'
   return (ApplicationExpression {func, arg})
-  where xp = (FunctionExpression <$> functionParser) <|> applicationParser <|> (NameExpression <$> nameSpan)
-
+  where
+    xp = (FunctionExpression <$> functionParser) <|> applicationParser <|> (NameExpression <$> nameSpan)
 
 expressionParser :: Parser Expression
 expressionParser =
@@ -141,6 +142,9 @@ defOrComment = do
 
 definitions :: Parser [Definition]
 definitions = many defOrComment
+
+parseDefinitions :: String -> Maybe [Definition]
+parseDefinitions = finalize definitions
 
 programParser :: Parser (Expression, [Definition])
 programParser = do

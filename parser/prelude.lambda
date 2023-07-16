@@ -6,7 +6,7 @@ def apply func arg = func arg
 
 def select_first first second = first
 def select_second first second = second
-def make_pair e1 e2 c = c e1 e2
+def make_pair e1 e2 s = s e1 e2
 
 # BOOLEAN LOGIC
 
@@ -38,40 +38,36 @@ def is_zero n = n select_first
 def pred1 n = n select_second
 def pred n = (((is_zero n) zero) (n select_second))
 
-def add1 _add x y = (((
+def add x y = (((
     if (is_zero y)
   ) 
     x) 
-    ((_add (succ x)) (pred y)))
-def add = recursive add1
+    ((add (succ x)) (pred y)))
 
-def sub1 _sub x y = (((
+def sub x y = (((
     if (is_zero y)
   ) 
     x) 
-    ((_sub (pred x)) (pred y)))
-def sub = recursive sub1
+    ((sub (pred x)) (pred y)))
 
-def mult1 _mult x y = (((
+def mult x y = (((
     if (is_zero y)
   ) 
     zero) 
-    ((add x) ((_mult x) (pred y))))
-def mult = recursive mult1
+    ((add x) ((mult x) (pred y))))
 
-def div1 _div x y = (((
+def div1 x y = (((
     if ((greater y) x)
   ) 
     zero) 
-    (succ ((_div ((sub x) y)) y)))
-def div2 = recursive div1
+    (succ ((div ((sub x) y)) y)))
 def div x y = (((
     if (is_zero y)
   ) 
     zero) 
-    ((div2 x) y))
+    ((div1 x) y))
 
-def equal1 _equal x y = (((
+def equal x y = (((
     if ((and (is_zero x)) (is_zero y))
   )
     true)
@@ -79,8 +75,7 @@ def equal1 _equal x y = (((
       if ((or (is_zero x)) (is_zero y))
     )
         false)
-        ((_equal (pred x)) (pred y))))
-def equal = recursive equal1
+        ((equal (pred x)) (pred y))))
 
 def greater x y = (not (is_zero ((sub x) y)))
 def greater_or_equal x y = (is_zero ((sub x) y))
@@ -89,10 +84,6 @@ def less_or_equal = flip greater_or_equal
 
 # FUNCTIONAL UTILS
 
-def recursive f = (
-  \s -> (f (s s))
-  \s -> (f (s s))
-)
 def flip f = \a -> \b -> f b a
 
 # TYPES
@@ -200,3 +191,30 @@ def / X Y = (((
         NUMB_ERROR)
         (MAKE_NUMB ((div1 (value X)) (value Y)))))
     NUMB_ERROR)
+
+# LISTS
+
+def list_type = three
+def MAKE_LIST = make_obj list_type
+def LIST_ERROR = MAKE_ERROR numb_type
+def is_list = is_type list_type
+def IS_LIST L = MAKE_BOOL (is_list L)
+
+def CONS H T = (((
+    if (is_list T)
+  )
+    (MAKE_LIST ((make_pair H) T)))
+    LIST_ERROR)
+
+def NIL = MAKE_LIST ((make_pair LIST_ERROR) LIST_ERROR)
+def HEAD L = (((
+    if (is_list L)
+  )
+    ((value L) select_first))
+    LIST_ERROR)
+
+def TAIL L =(((
+    if (is_list L)
+  )
+    ((value L) select_second))
+    LIST_ERROR)

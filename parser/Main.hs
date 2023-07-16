@@ -1,5 +1,6 @@
 module Main where
 
+-- TODO: optimize running the lambda code
 -- TODO: use Either instead of Maybe for better error reporting
 
 import Lambda.Parse (Function, parseDefinitions)

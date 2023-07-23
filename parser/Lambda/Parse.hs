@@ -1,9 +1,9 @@
 module Lambda.Parse
   ( parseProgram,
-    parseDefinitions,
     Expression (..),
     Definition (..),
     Function (..),
+    parseDefinitions,
   )
 where
 
@@ -65,31 +65,37 @@ applicationParser :: Parser Expression
 applicationParser = do
   charP '('
   wsP
-  func <- xp
+  func <- partExpressionParser
   wsP
-  arg <- xp
+  arg <- partExpressionParser
   wsP
   charP ')'
   return (ApplicationExpression {func, arg})
-  where
-    xp = (FunctionExpression <$> functionParser) <|> applicationParser <|> (NameExpression <$> nameSpan)
+
+functionExpressionParser :: Parser Expression
+functionExpressionParser = FunctionExpression <$> functionParser
+
+nameExpressionParser :: Parser Expression
+nameExpressionParser = NameExpression <$> nameSpan
+
+partExpressionParser :: Parser Expression
+partExpressionParser = functionExpressionParser <|> applicationParser <|> nameExpressionParser
 
 expressionParser :: Parser Expression
 expressionParser =
-  (FunctionExpression <$> functionParser)
+  functionExpressionParser
     <|> applicationParser
     <|> complexAppParser
-    <|> (NameExpression <$> nameSpan)
+    <|> nameExpressionParser
 
+-- TODO
 complexAppParser :: Parser Expression
 complexAppParser = do
-  func <- xp
+  func <- partExpressionParser
   charP ' '
-  arg <- xp
+  arg <- partExpressionParser
   exps <- many $ charP ' ' *> expressionParser
   return $ foldl ApplicationExpression (ApplicationExpression {func, arg}) exps
-  where
-    xp = (FunctionExpression <$> functionParser) <|> applicationParser <|> (NameExpression <$> nameSpan)
 
 -- Definition
 
@@ -116,7 +122,7 @@ complexDefParser = do
   charP '='
   wsP
   expression <- expressionParser
-  let final = foldr (\prm exp -> FunctionExpression (Function {param = prm, body = exp})) expression params
+  let final = foldr (\prm exp -> FunctionExpression $ Function prm exp) expression params
   return Definition {name = name, expression = final}
 
 definitionParser :: Parser Definition
@@ -137,6 +143,7 @@ commentParser = do
 defOrComment :: Parser Definition
 defOrComment = do
   many commentParser
+  -- TODO: maybe remove this?
   wsP
   definitionParser <* (charP '\n' *> wsP <|> pure [])
 
